@@ -80,6 +80,7 @@ extends KinematicBody
 #		camera_angle += change
 
 var velocity = Vector3()
+var vertical_velocity = Vector3(0, -14, 0)
 var residual = Vector3()
 var velocity_x = Vector3()
 var velocity_z = Vector3()
@@ -162,17 +163,22 @@ func _physics_process(delta):
 
 	get_input()
 	move_and_collide(velocity * delta)
+	move_and_collide(vertical_velocity * delta)
+	vertical_velocity.y -= 1.4
+	vertical_velocity.y = max(vertical_velocity.y, -14)
 
 
 func _input(event):
-	if !(event is InputEventMouseMotion):
+	if !(event is InputEventMouseMotion) and !(Input.is_action_just_pressed("ui_accept")):
 		return
 
-	rotation_degrees.y -= MOUSE_SENSITIVITY * event.relative.x
+	if (event is InputEventMouseMotion):
+		rotation_degrees.y -= MOUSE_SENSITIVITY * event.relative.x
+	
+		var change = -event.relative.y * MOUSE_SENSITIVITY
+		if (camera_angle + change < 90 and camera_angle + change > -90):
+			camera.rotation_degrees.x -= MOUSE_SENSITIVITY * event.relative.y
+			camera_angle += change
 
-	var change = -event.relative.y * MOUSE_SENSITIVITY
-	if (camera_angle + change < 90 and camera_angle + change > -90):
-		camera.rotation_degrees.x -= MOUSE_SENSITIVITY * event.relative.y
-		camera_angle += change
-
-
+	if (Input.is_action_just_pressed("ui_accept")):
+		vertical_velocity += Vector3(0,36,0)
