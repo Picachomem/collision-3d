@@ -79,8 +79,13 @@ extends KinematicBody
 #		camera.rotation_degrees.x -= MOUSE_SENSITIVITY * event.relative.y
 #		camera_angle += change
 
+var space
+var ray_cast_down = Vector3()
+var result = false
+
+var prev_transform = Vector3()
 var velocity = Vector3()
-var vertical_velocity = Vector3(0, -14, 0)
+var vertical_velocity = Vector3(0, -20, 0)
 var residual = Vector3()
 var velocity_x = Vector3()
 var velocity_z = Vector3()
@@ -164,9 +169,32 @@ func _physics_process(delta):
 	get_input()
 	move_and_collide(velocity * delta)
 	move_and_collide(vertical_velocity * delta)
-	vertical_velocity.y -= 1.4
-	vertical_velocity.y = max(vertical_velocity.y, -14)
+	
+	if (prev_transform.y - global_transform.origin.y <= 0.000003) and (vertical_velocity.y <=0):
+		vertical_velocity = Vector3(0,0,0)
+		
+#	if !(test_move(self.transform, Vector3(0,-0.01,0))):
+#		vertical_velocity.y -= 1.4
+#		vertical_velocity.y = max(vertical_velocity.y, -20)
+#
+#	elif (test_move(self.transform, Vector3(0,-0.01,0))):
+#		vertical_velocity = Vector3()
 
+	space = get_world().direct_space_state
+	ray_cast_down = global_transform.origin
+	ray_cast_down.y -= 1.4
+	result = space.intersect_ray(global_transform.origin, ray_cast_down, [self])
+	
+	if (result.size() == 0):
+		vertical_velocity.y -= 1.4
+		vertical_velocity.y = max(vertical_velocity.y, -30)
+
+	else:
+		vertical_velocity = Vector3(0,0,0)
+		
+	#print (global_transform.origin.y)
+		
+	prev_transform = global_transform.origin
 
 func _input(event):
 	if !(event is InputEventMouseMotion) and !(Input.is_action_just_pressed("ui_accept")):
@@ -181,4 +209,4 @@ func _input(event):
 			camera_angle += change
 
 	if (Input.is_action_just_pressed("ui_accept")):
-		vertical_velocity += Vector3(0,36,0)
+		vertical_velocity += Vector3(0,24,0)
