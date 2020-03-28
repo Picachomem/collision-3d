@@ -7,7 +7,7 @@
 
 [sub_resource type="CubeMesh" id=2]
 
-[sub_resource type="CylinderShape" id=5]
+[sub_resource type="CylinderShape" id=3]
 
 [sub_resource type="CubeMesh" id=4]
 material = ExtResource( 2 )
@@ -29,7 +29,7 @@ script = ExtResource( 1 )
 
 [node name="CollisionShape" type="CollisionShape" parent="KinematicBody"]
 transform = Transform( -2.62268e-008, 0, 0.6, 0, 1, 0, -0.6, 0, -2.62268e-008, 0, -0.372195, 0 )
-shape = SubResource( 5 )
+shape = SubResource( 3 )
 
 [node name="Camera" type="Camera" parent="KinematicBody"]
 transform = Transform( -4.37114e-008, 0, 1, 0, 1, 0, -1, 0, -4.37114e-008, 0, 0.28482, 0 )

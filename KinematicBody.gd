@@ -1,83 +1,6 @@
 extends KinematicBody
 
-#var residual_velocity = Vector3()
-#var velocity = Vector3()
-#var unrotated_velocity = Vector3()
-#var input_velocity = Vector3()
-#
-#var speed = 16
-#var speed_build = 0
-#var deccel = 16
-#var acceleration = 0.4
-#
-#var MOUSE_SENSITIVITY = 0.06
-#var camera_angle = 0
-#
-#onready var camera = self.get_child(1)
-#
-#func _ready():
-#	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-#	return
-#
-#
-#func get_input():
-#	# Detect up/down/left/right keystate and only move when pressed.
-#	input_velocity = Vector3()
-#	if Input.is_action_pressed('right'):
-#		input_velocity.z -= 1
-#	if Input.is_action_pressed('left'):
-#		input_velocity.z += 1
-#	if Input.is_action_pressed('down'):
-#		input_velocity.x += 1
-#	if Input.is_action_pressed('up'):
-#		input_velocity.x -= 1
-#
-#
-##	if (input_velocity.length() == 0):
-##	speed_build -= (acceleration * 1.6)
-##	speed_build = max(0, speed_build)
-##
-##	velocity = velocity.normalized() * speed_build
-#
-#	deccel -= acceleration * 1.6
-#	deccel = max(0, deccel)
-#
-#	residual_velocity = velocity.normalized() * deccel
-#
-##	else:
-#	if (input_velocity.length() != 0):
-#		speed_build += acceleration
-#		speed_build = min(speed, speed_build)
-#
-#		velocity = (input_velocity.normalized() + residual_velocity) * speed_build
-#
-#		if (unrotated_velocity.angle_to(velocity) >= (PI/2 - 1)):
-#			speed_build = acceleration
-#			velocity = (input_velocity.normalized() + residual_velocity) * speed_build
-#
-#		unrotated_velocity = velocity
-#		velocity = velocity.rotated(Vector3(0,1,0), rotation.y)
-#
-##		velocity += residual_velocity
-##		velocity /= 2
-#
-#func _physics_process(delta):
-#
-#	get_input()
-##	velocity =
-#	move_and_collide(velocity * delta)
-#
-#
-#func _input(event):
-#	if !(event is InputEventMouseMotion):
-#		return
-#
-#	rotation_degrees.y -= MOUSE_SENSITIVITY * event.relative.x
-#
-#	var change = -event.relative.y * MOUSE_SENSITIVITY
-#	if (camera_angle + change < 90 and camera_angle + change > -90):
-#		camera.rotation_degrees.x -= MOUSE_SENSITIVITY * event.relative.y
-#		camera_angle += change
+var canjump = false
 
 var space
 var ray_cast_down = Vector3()
@@ -144,12 +67,6 @@ func get_input():
 		accel_inc_z = min(accel_inc_z, speed)
 		velocity_z = input_velocity_z * accel_inc_z
 
-#	if (input_velocity_x.rotated(Vector3(0,1,0), rotation.y).angle_to(Vector3(velocity.x,0,0)) > 0.6):
-#		residual.x = velocity.x
-#		print("aaa")
-#	if (input_velocity_z.rotated(Vector3(0,1,0), rotation.y).angle_to(Vector3(0,0,velocity.z)) > 0.6):
-#		residual.z = velocity.z
-#		print("aaa")
 	if ((input_velocity_x + input_velocity_z).rotated(Vector3(0,1,0), rotation.y).angle_to(velocity) > PI/4):
 		residual = velocity * 0.96
 		
@@ -170,15 +87,12 @@ func _physics_process(delta):
 	move_and_collide(velocity * delta)
 	move_and_collide(vertical_velocity * delta)
 	
-	if (prev_transform.y - global_transform.origin.y <= 0.000003) and (vertical_velocity.y <=0):
-		vertical_velocity = Vector3(0,0,0)
-		
-#	if !(test_move(self.transform, Vector3(0,-0.01,0))):
-#		vertical_velocity.y -= 1.4
-#		vertical_velocity.y = max(vertical_velocity.y, -20)
-#
-#	elif (test_move(self.transform, Vector3(0,-0.01,0))):
-#		vertical_velocity = Vector3()
+	canjump = false
+	
+	if (pow(pow(prev_transform.y - global_transform.origin.y,2), 0.5) <= 0.000003):
+		canjump = true
+		if (vertical_velocity.y <=0):
+			vertical_velocity = Vector3(0,0,0)
 
 	space = get_world().direct_space_state
 	ray_cast_down = global_transform.origin
@@ -187,12 +101,10 @@ func _physics_process(delta):
 	
 	if (result.size() == 0):
 		vertical_velocity.y -= 1.4
-		vertical_velocity.y = max(vertical_velocity.y, -30)
+		vertical_velocity.y = max(vertical_velocity.y, -50)
 
 	else:
 		vertical_velocity = Vector3(0,0,0)
-		
-	#print (global_transform.origin.y)
 		
 	prev_transform = global_transform.origin
 
@@ -208,5 +120,5 @@ func _input(event):
 			camera.rotation_degrees.x -= MOUSE_SENSITIVITY * event.relative.y
 			camera_angle += change
 
-	if (Input.is_action_just_pressed("ui_accept")):
+	if (Input.is_action_just_pressed("ui_accept")) and canjump:
 		vertical_velocity += Vector3(0,24,0)
