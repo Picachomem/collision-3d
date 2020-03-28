@@ -1,5 +1,7 @@
 extends KinematicBody
 
+var Projectile = preload("res://Projectile.tscn")
+
 var canjump = false
 
 var space
@@ -8,7 +10,7 @@ var result = false
 
 var prev_transform = Vector3()
 var velocity = Vector3()
-var vertical_velocity = Vector3(0, -20, 0)
+var vertical_velocity = Vector3(0, -40, 0)
 var residual = Vector3()
 var velocity_x = Vector3()
 var velocity_z = Vector3()
@@ -81,13 +83,18 @@ func get_input():
 	if (velocity.length() > speed):
 		velocity = velocity.normalized() * speed
 
+
 func _physics_process(delta):
 
 	get_input()
+#	move_and_slide(velocity)
 	move_and_collide(velocity * delta)
 	move_and_collide(vertical_velocity * delta)
 	
 	canjump = false
+	
+	if (is_on_floor()):
+		print("floor")
 	
 	if (pow(pow(prev_transform.y - global_transform.origin.y,2), 0.5) <= 0.000003):
 		canjump = true
@@ -108,9 +115,14 @@ func _physics_process(delta):
 		
 	prev_transform = global_transform.origin
 
+
 func _input(event):
-	if !(event is InputEventMouseMotion) and !(Input.is_action_just_pressed("ui_accept")):
+	if (!(event is InputEventMouseMotion) and !(Input.is_action_just_pressed("ui_accept"))
+	and !(Input.is_action_just_pressed("l_click"))):
 		return
+		
+	if (Input.is_action_just_pressed("l_click")):
+		var a = Projectile.instance()
 
 	if (event is InputEventMouseMotion):
 		rotation_degrees.y -= MOUSE_SENSITIVITY * event.relative.x
