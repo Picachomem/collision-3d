@@ -3,8 +3,10 @@ extends KinematicBody
 var Projectile = preload("res://Projectile.tscn")
 
 var canjump = false
+var aux
 
 var space
+var look_dir = Vector3()
 var ray_cast_down = Vector3()
 var result = false
 
@@ -27,6 +29,7 @@ var MOUSE_SENSITIVITY = 0.06
 var camera_angle = 0
 
 onready var camera = self.get_child(1)
+onready var scene = self.get_parent()
 
 
 func _ready():
@@ -121,8 +124,23 @@ func _input(event):
 	and !(Input.is_action_just_pressed("l_click"))):
 		return
 		
-	if (Input.is_action_just_pressed("l_click")):
+	if (Input.is_action_pressed("l_click")):
 		var a = Projectile.instance()
+		scene.add_child(a)
+		look_dir = (camera.get_child(0).global_transform.origin - camera.global_transform.origin).normalized()
+		aux = camera.global_transform.origin
+		aux.y -= 0.2
+		a.global_transform.origin = aux
+		a.vel = look_dir * 70
+#		a.rotation_degrees.y = camera.rotation_degrees.y
+#		a.rotation_degrees.x = rotation_degrees.x
+#		a.rotation_degrees.z = rotation_degrees.z
+#		print(a.rotation_degrees)
+#		aux = camera.global_transform
+#		aux.origin += Vector3(-10, 0, 0).rotated(Vector3(0,1,0), self.rotation.y)
+#		a.global_transform = aux
+#		a.vel = aux.origin - camera.global_transform.origin
+#		print (a.vel)
 
 	if (event is InputEventMouseMotion):
 		rotation_degrees.y -= MOUSE_SENSITIVITY * event.relative.x
